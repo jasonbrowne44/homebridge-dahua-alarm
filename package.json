@@ -1,0 +1,45 @@
+{
+  "name": "homebridge-dahua-alarm-plugin",
+  "version": "1.0.0",
+  "description": "Homebridge plugin for Dahua/Lorex camera Alarm support",
+  "main": "dist/homebridge-alarm-plugin.js",
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "build": "rimraf ./dist && tsc",
+    "prepublishOnly": "npm run build",
+    "postpublish": "npm run clean",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "authors": [
+    "Jason Browne <jbrowne44@msn.com>",
+    "(template) Andreas Bauer <mail@anderl-bauer.de>"
+  ],
+  "engines": {
+    "homebridge": ">=1.0.0"
+  },
+  "license": "ISC",
+  "files": [
+    "LICENSE",
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/homebridge/homebridge-examples.git"
+  },
+  "bugs": {
+    "url": "https://github.com/homebridge/homebridge-examples/issues"
+  },
+  "devDependencies": {
+    "@types/blueimp-md5": "^2.18.0",
+    "@types/node": "16.11.7",
+    "homebridge": "^1.6.1",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "blueimp-md5": "^2.19.0",
+    "http": "^0.0.1-security",
+    "md5-hex": "^4.0.0"
+  }
+}
