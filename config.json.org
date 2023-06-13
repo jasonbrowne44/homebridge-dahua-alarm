@@ -1,0 +1,64 @@
+{
+  "pluginAlias": "DahuaLorexAlarmPlatform",
+  "pluginType": "platform",
+  "headerDisplay": "Dahua/Lorex Camera Siren Switch to trigger alarm on all cameras for a home alarm system",
+  "footerDisplay": "Issues with the Camera Siren?  File an issue at https://github/jasonbrowne44/homebridge-dahua-alarm",
+  "singular": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "cameras": {
+        "title": "Alarm Cameras",
+        "type": "array",
+        "required": true,
+        "min length": 1,
+        "items": {
+          "title": "Camera 1",
+          "type": "object",
+          "properties": {
+            "index": {
+              "title": "Camera Index",
+              "type": "number",
+              "required": true,
+              "placeholder": 0,
+              "description": "Index of Camera"
+            },
+            "cameraName": {
+              "type": "string",
+              "required": true,
+              "description": "Camera Name"
+            },
+            "cameraCredentials": {
+              "title":"Camera Credentials to issue siren command",
+              "type":"object",
+              "required":true,
+              "properties": {
+                "url":{
+                  "title": "url",
+                  "type": "string",
+                  "required": true,
+                  "placeholder": "192.0.0.1",
+                  "description": "URL of Camera"
+                },
+                "user":{
+                  "title":"user",
+                  "type": "string",
+                  "required": true,
+                  "placeholder": "admin",
+                  "description": "Username for Camera Login"
+                },
+                "password":{
+                  "title": "password",
+                  "type": "string",
+                  "required": true,
+                  "placeholder": "password",
+                  "description": "Password for Camera Login"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
