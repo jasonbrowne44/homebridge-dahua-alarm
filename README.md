@@ -7,20 +7,23 @@ This plugin has only been tested with a Dahua/Lorex N844A8 NVR and Lorex E893AB 
 
 FYI, I haven't added https support, but this is easy to add if anyone needs it.
 
-# Compatible NVRs
+### Compatible NVRs
 
 N844A8, but should be compatible with most Dahua/Lorex NVRs.
 
-# Compatible Dahua/Lorex DVRs
+### Compatible Dahua/Lorex DVRs
 
 Unknown, but should be compatible with most Dahua/Lorex DVRs.
 
-# Compatible Dahua/Lorex Cameras
+### Compatible Dahua/Lorex Cameras
 
 E893AB, but should be compatible with most Dahua/Lorex Cameras.
 
 
-# Configuration:
+### Configuration:
 
-Just add your camera's IP address, username and password to add a camera to the security sytsem under "cameras" in your configration.
+Just add your camera's IP address, username and password to add a camera to the security system under "cameras" in your configuration.
+
+### Development
+- `npm run build` to get JS output in `dist`
 
