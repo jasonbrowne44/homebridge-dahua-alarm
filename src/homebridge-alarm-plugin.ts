@@ -229,9 +229,9 @@ class DahuaLorexAlarmPlatform implements DynamicPlatformPlugin {
             let userName = this.getCameraUserName(camera.index);
             let passWord = this.getCameraPassWord(camera.index);
             this.controlDahuaLorexCameraAlarm(cameraURL, channel, 1, userName, passWord);
+            }
+        sleep(10000);    
         }
-      }
-      sleep(10000);
       }
 
     silenceAllAlarms() {
