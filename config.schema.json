@@ -17,7 +17,7 @@
           "type": "object",
           "properties": {
             "index": {
-              "title": "Camera Index",
+              "title": "index",
               "type": "number",
               "required": true,
               "placeholder": 0,
@@ -25,8 +25,9 @@
             },
             "cameraName": {
               "type": "string",
+              "title": "cameraName",
               "required": true,
-              "description": "Camera Name"
+              "description": "Name of Camera"
             },
             "cameraCredentials": {
               "title":"Camera Credentials to issue siren command",
@@ -37,7 +38,7 @@
                   "title": "url",
                   "type": "string",
                   "required": true,
-                  "placeholder": "192.0.0.1",
+                  "placeholder": "192.168.0.1",
                   "description": "URL of Camera"
                 },
                 "user":{
@@ -60,5 +61,25 @@
         }
       }
     }
-  }
+  },
+  "layout":[
+        {
+            "key": "cameras",
+            "items": [
+                "cameras[].index",
+                "cameras[].cameraName",
+                {
+                    "key": "cameras[].cameraCredentials",
+                    "type": "section",
+                    "expandable": true,
+                    "expanded": false,
+                    "items":[
+                        "cameras[].cameraCredentials.url",
+                        "cameras[].cameraCredentials.user",
+                        "cameras[].cameraCredentials.password"
+                    ]
+                }
+            ]
+        }
+    ]
 }
