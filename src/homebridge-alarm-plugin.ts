@@ -19,8 +19,8 @@ import { CameraSettings, DahuaLorexPlatformConfig } from './configTypes';
 import { log } from "console";
 import md5 from "blueimp-md5";
 
-const PLUGIN_NAME = "homebridge-dahua-alarm-plugin";
-const PLATFORM_NAME = "DahuaLorexAlarmPlatform";
+const PLUGIN_NAME = "homebridge-dahua-alarm";
+const PLATFORM_NAME = "dahua-alarm";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
