@@ -1,8 +1,8 @@
 {
-  "pluginAlias": "DahuaLorexAlarmPlatform",
+  "pluginAlias": "dahua-alarm",
   "pluginType": "platform",
-  "headerDisplay": "Dahua/Lorex Camera Siren Switch to trigger alarm on all cameras for a home alarm system",
-  "footerDisplay": "Issues with the Camera Siren?  File an issue at https://github/jasonbrowne44/homebridge-dahua-alarm",
+  "headerDisplay": "Header",
+  "footerDisplay": "Footer",
   "singular": true,
   "schema": {
     "type": "object",
