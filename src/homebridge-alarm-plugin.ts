@@ -1,5 +1,5 @@
 import http, { IncomingMessage, Server, ServerResponse } from "http";
-import axios, { AxiosBasicCredentials, AxiosResponse, AxiosError, AxiosRequestConfig } from "axios";
+import axios from 'axios';
 import {
     API,
     APIEvent,
@@ -17,12 +17,10 @@ import {
 import { allowedNodeEnvironmentFlags } from "process";
 import { CameraSettings, DahuaLorexPlatformConfig } from './configTypes';
 import { log } from "console";
-import md5 from "blueimp-md5";
+import md5 from 'blueimp-md5';
 
 const PLUGIN_NAME = "homebridge-dahua-alarm";
-const PLATFORM_NAME = "dahua-alarm";
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const PLATFORM_NAME = "homebridge-dahua-alarm-platform";
 
 /*
  * IMPORTANT NOTICE
@@ -74,7 +72,9 @@ class DahuaLorexAlarmPlatform implements DynamicPlatformPlugin {
     private readonly accessories: PlatformAccessory[] = [];
 
     private siren: boolean = false;
+    private switchState: boolean = false;
 
+    private sirenCount: number = 0;
     private cameras: DahuaLorexCamera[] = [];
 
     constructor(log: Logging, config: PlatformConfig, api: API) {
@@ -83,7 +83,9 @@ class DahuaLorexAlarmPlatform implements DynamicPlatformPlugin {
 
         log.info("Dauha/Lorex starting DahuaLorexAlarmPlatform constructor");
 
-        config = config as DahuaLorexPlatformConfig;
+	    log.info("Dahua/Lorex config:"+JSON.stringify(config));
+
+        config = config as unknown as DahuaLorexPlatformConfig;
 
         log.info("Dahua/Lorex config:"+JSON.stringify(config));
 
@@ -91,10 +93,9 @@ class DahuaLorexAlarmPlatform implements DynamicPlatformPlugin {
           let error = false;
           
         let lorexDahuaCamera: DahuaLorexCamera = {
-          IP: cameraConfig.cameraCredentials.IP,
+          ip: cameraConfig.cameraCredentials.ip,
           channel: cameraConfig.channel,
-          index: cameraConfig.index,
-          username: cameraConfig.cameraCredentials.username,
+          user: cameraConfig.cameraCredentials.user,
           password: cameraConfig.cameraCredentials.password
         };
 
@@ -119,6 +120,15 @@ class DahuaLorexAlarmPlatform implements DynamicPlatformPlugin {
         });
     };
 
+    private readonly getSwitchState = (
+        callback: CharacteristicGetCallback
+      ) => {
+        callback(
+          null,
+          this.switchState
+        );
+      };
+    
     /*
      * This function is invoked when homebridge restores cached accessories from disk at startup.
      * It should be used to setup event handlers for characteristics and update respective values.
@@ -131,8 +141,17 @@ class DahuaLorexAlarmPlatform implements DynamicPlatformPlugin {
         });
 
         accessory.getService(hap.Service.Switch)!.getCharacteristic(hap.Characteristic.On)
+            .on(CharacteristicEventTypes.GET, this.getSwitchState)
             .on(CharacteristicEventTypes.SET, (value: CharacteristicValue, callback: CharacteristicSetCallback) => {
                 this.log.info("%s Switch was set to: " + value);
+                if (value == true)
+                    {
+                        this.switchState = true;
+                    }
+                    else
+                    {
+                        this.switchState = false;
+                    }
                 if (value == true) {
                     this.log.info("Fire the sirens on all cameras.");
                     this.triggerAllAlarms();
@@ -150,15 +169,15 @@ class DahuaLorexAlarmPlatform implements DynamicPlatformPlugin {
     // --------------------------- CUSTOM METHODS ---------------------------
 
     private getCameraIP = (cameraNumber: number): string => {
-        return this.cameras[cameraNumber].IP;
+        return this.cameras[cameraNumber].ip;
     }
 
     private getCameraChannel = (cameraNumber: number): string => {
-        return this.cameras[cameraNumber].channel;
+        return this.cameras[cameraNumber].channel.toString();
     }
 
     private getCameraUserName = (cameraNumber: number): string => {
-        return this.cameras[cameraNumber].username;
+        return this.cameras[cameraNumber].user;
     }
 
     private getCameraPassWord = (cameraNumber: number): string => {
@@ -166,83 +185,100 @@ class DahuaLorexAlarmPlatform implements DynamicPlatformPlugin {
     }
 
     controlDahuaLorexCameraAlarm = (cameraIP: String | null, channel: string, value: number, userName : string, passWord: string) => {
+        this.log.info("controlDahuaLorexCameraAlarm cameraIP="+cameraIP+" channel="+channel+" value="+value+" userName="+userName+" passWord="+passWord);
         let postData1 = '{"method":"global.login","params":{"userName":"admin","password":"","clientType":"Web3.0","loginType":"Direct"},"id":1}:';
-        console.log("PostData1:" + postData1);
+        //this.log.info("PostData1:" + postData1);
         axios.post('http://' + cameraIP + '/RPC2_Login', postData1
-        ).then(function(response) {
+        ).then((response) => {
+            //this.log.info("First Logon Response:" + JSON.stringify(response.data));
             let sessionId = response.data.session;
             let random = response.data.params.random;
             let realm = response.data.params.realm;
-            console.log("userName:" + userName + " random:" + random + " realm:" + realm);
+            //this.log.info("userName:" + userName + " random:" + random + " realm:" + realm);
             let passwordString = 'admin' + ':' + realm + ':' + passWord;
-            console.log("PasswordString:" + passwordString);
+            //this.log.info("PasswordString:" + passwordString);
             let passwordTotalString = userName + ':' + random + ':' + md5(passwordString).toUpperCase();
-            console.log("PasswordTotalString:" + passwordTotalString);
+            //this.log.info("PasswordTotalString:" + passwordTotalString);
             let hexPass = md5(passwordTotalString).toUpperCase();
-            let postData2 = '{"method":"global.login","params":{"userName":'+ userName + ',"password":"' + hexPass + '","clientType":"Web3.0","loginType":"Direct","authorityType":"Default"},"id":2,"session":"' + sessionId + '"}';
-            console.log("postData2:" + postData2);
+            let postData2 = '{"method":"global.login","params":{"userName":"'+ userName + '","password":"' + hexPass + '","clientType":"Web3.0","loginType":"Direct","authorityType":"Default"},"id":2,"session":"' + sessionId + '"}';
+            //this.log.info("postData2:" + postData2);
             axios.post('http://' + cameraIP + '/RPC2_Login', postData2
-            ).then(function(response) {
-                console.log("Second Login Response Data:" + JSON.stringify(response.data));
+            ).then((response) => {
+                //this.log.info("Second Login Response Data:" + JSON.stringify(response.data));
                 let postData3 = '{"method":"CoaxialControlIO.control","params":{"channel":'+ channel + ',"info":[{"Type":2,"IO":' + value +',"TriggerMode":2}]},"id":3,"session":"' + sessionId + '"}';
-                console.log("PostData3:" + postData3);
+                //this.log.info("PostData3:" + postData3);
                 axios.post('http://' + cameraIP + '/RPC2', postData3
-                ).then(function(response) {
-                    console.log("Command Response:" + JSON.stringify(response.data));
+                ).then((response) => {
+                    //this.log.info("Command Response:" + JSON.stringify(response.data));
                     let result = response.data.result;
                     if (result) {
                         if (value == 1)
                         {
-                        console.log("Alarm Triggered!");
+                          this.log.info("Alarm Triggered!");
                         }
                         if (value == 0)
                         {
-                          console.log("Alarm Silenced!");
+                          this.log.info("Alarm Silenced!");
                         }
                     }
-                }).catch(function(error) {
-                    console.log("Command Error:" + error);
+                }).catch((error) => {
+                    this.log.info("Command Error:" + error);
                 });
-            }).catch(function(error) {
-                console.log("Second Login Error:" + error);
+            }).catch((error) => {
+                this.log.info("Second Login Error:" + error);
             });
-        }).catch(function(error) {
+        }).catch((error) => {
             if (error.response) {
-                console.log("error: " + error.response);
-                console.log("Data: " + error.response.data);
-                console.log("Status: " + error.response.status);
-                console.log("Headers: " + error.response.headers);
+                this.log.info("error: " + error.response);
+                this.log.info("Data: " + error.response.data);
+                this.log.info("Status: " + error.response.status);
+                this.log.info("Headers: " + error.response.headers);
             }
-            console.log("Error:" + error);
+            this.log.info("Error:" + error);
         });
 
+    }
+
+    triggerAllAlarmsOnce() {
+        for (var camera of this.cameras) {
+            let cameraIP = camera.ip;
+            let channel = camera.channel.toString();
+            let userName = camera.user;
+            let passWord = camera.password;
+            this.log.info("ip="+cameraIP+" channel="+channel+" userName="+userName+" password="+passWord);
+            this.controlDahuaLorexCameraAlarm(cameraIP, channel, 1, userName, passWord);
+            }
     }
 
     triggerAllAlarms() {
         this.log.info("Triggering All Alarms");
         this.siren = true
-        while (this.siren)
+        this.triggerAllAlarmsOnce();
+        this.triggerAllAlarmsInternal();
+    }
+
+    triggerAllAlarmsInternal() {
+        setTimeout(() => 
         {
-        for (var camera of this.cameras) {
-            let cameraURL = this.getCameraIP(camera.index);
-            let channel = this.getCameraChannel(camera.index);
-            let userName = this.getCameraUserName(camera.index);
-            let passWord = this.getCameraPassWord(camera.index);
-            this.controlDahuaLorexCameraAlarm(cameraURL, channel, 1, userName, passWord);
-            }
-        sleep(10000);    
+        this.triggerAllAlarmsOnce();
+        if ((this.siren) && (this.sirenCount < 90))
+        {
+            this.triggerAllAlarmsInternal();
         }
+        },
+        10000);
       }
 
     silenceAllAlarms() {
         this.log.info("Silencing All Alarms");
         this.siren = false;
+        this.sirenCount = 0;
         for (var camera of this.cameras) {
-          let cameraIP = this.getCameraIP(camera.index);
-          let channel = this.getCameraChannel(camera.index);
-          let userName = this.getCameraUserName(camera.index);
-          let passWord = this.getCameraPassWord(camera.index);
-          this.controlDahuaLorexCameraAlarm(cameraIP, channel, 0, userName, passWord);
+            let cameraIP = camera.ip;
+            let channel = camera.channel.toString();
+            let userName = camera.user;
+            let passWord = camera.password;
+            this.controlDahuaLorexCameraAlarm(cameraIP, channel, 0, userName, passWord);
         }
     }
 
@@ -253,7 +289,7 @@ class DahuaLorexAlarmPlatform implements DynamicPlatformPlugin {
         const uuid = hap.uuid.generate(name);
         const accessory = new Accessory(name, uuid);
 
-        accessory.addService(hap.Service.Switch, "Alarm");
+        accessory.addService(hap.Service.Switch, name);
 
         this.configureAccessory(accessory); // abusing the configureAccessory here
 
@@ -272,9 +308,8 @@ class DahuaLorexAlarmPlatform implements DynamicPlatformPlugin {
 }
 
 type DahuaLorexCamera = {
-    index: number,
-    IP: string,
-    channel: string,
-    username: string,
+    channel: number,
+    ip: string,
+    user: string,
     password: string
 }

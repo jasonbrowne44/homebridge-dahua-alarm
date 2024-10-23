@@ -2,19 +2,17 @@ import { PlatformIdentifier, PlatformName } from 'homebridge';
 
 export type DahuaLorexPlatformConfig = {
   platform: PlatformName | PlatformIdentifier;
-  name?: string;
   cameras?: Array<CameraSettings>;
 };
 
 export type CameraCredentials = {
-  IP: string;
-  username: string;
+  ip: string;
+  user: string;
   password: string;
 }
 
 export type CameraSettings = {
-  index: number;
+  channel: number;
   cameraName: string;
-  channel: string;
   cameraCredentials: CameraCredentials;
-};%
+};

@@ -5,7 +5,7 @@ This is a Homebridge plugin that adds a switch to your Homebridge based security
 
 This plugin has only been tested with a Dahua/Lorex N844A8 NVR and Lorex E893AB cameras.  This plugin should function with most Dahua/Lorex NVRs, DVRs, and cameras.  It uses Dahua's/Lorex's implementation of basic authentication and the RPC interface that the NVR uses to talk to the cameras.  Dahua/Lorex has blocked using the camera sirens with the simple cgi-bin commands, so I was forced to use the more complex RPC interface that the NVR uses to talk to its cameras.  Just let me know if it works on your system and I can add this to the compatibility chart.
 
-FYI, I haven't added https support, but this is easy to add if anyone needs it.
+FYI, I haven't added https support, but this is easy to add if anyone needs it.  It should be as simple as changing http to https.
 
 ### Compatible NVRs
 
@@ -26,3 +26,5 @@ Just add your camera's IP address, username and password to add a camera to the 
 
 ### Development
 - `npm run build` to get JS output in `dist`
+
+
