@@ -1,6 +1,6 @@
 {
   "name": "homebridge-dahua-alarm",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Homebridge dynamic plugin for Dahua/Lorex camera alarm support",
   "main": "dist/homebridge-alarm-plugin.js",
   "scripts": {
@@ -28,7 +28,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/jasonbrowne44/homebridge-dahua-alarm.git"
+    "url": "https://github.com/jasonbrowne44/homebridge-dahua-alarm"
   },
   "keywords": [
     "Dahua",

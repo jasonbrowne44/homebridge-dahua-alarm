@@ -7,7 +7,17 @@
   "schema": {
     "type": "object",
     "properties": {
-      "cameras": {
+        "name": {
+        "title": "Dahua/Lorex Alarm Plugin",
+        "type": "string",
+        "required": true,
+        "description": "This is the name of the plugin for logs.",
+        "default": "Dahua/Lorex Alarm Plugin",
+        "placeholder": "Dahua/Lorex Alarm Plugin",
+        "minLength": 1,
+        "maxLength": 50
+      	},
+      	"cameras": {
         "title": "Alarm Cameras",
         "type": "array",
         "required": true,
